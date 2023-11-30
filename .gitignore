@@ -1,3 +1,4 @@
 config.ini
 .env
-./data
+data/
+**/__pycache__/

@@ -11,6 +11,9 @@ from models import Home, Room, User
 # access to the values within the .ini file in use.
 config = context.config
 
+
+from config import Configuration as config_module
+config.set_main_option("sqlalchemy.url", config_module.get('POSTGRESQL', 'DB_URL'))
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:
