@@ -1,11 +1,13 @@
 from datetime import date
-from sqlalchemy import Column, DateTime, Integer, String, Boolean, ForeignKey, Geometry
+from sqlalchemy import Column, DateTime, Integer, String, Boolean, ForeignKey
+from geoalchemy2 import Geometry
 from database import Base
 from sqlalchemy.orm import deferred
 
 from sqlalchemy.orm import Mapped
 
 class Home(Base):
+    __tablename__ = "home"
     id: int = Column(Integer, primary_key=True, index=True)
     name: str = Column(String, unique=True, index=True)
     address: str = Column(String, unique=True, index=True)

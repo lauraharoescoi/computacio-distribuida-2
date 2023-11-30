@@ -1,0 +1,2 @@
+[POSTGRESQL]
+DB_URL = host://user:password@host:port/db_name
