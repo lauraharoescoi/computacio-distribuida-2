@@ -11,3 +11,16 @@ engine = create_engine(DB_URL)
 SessionLocal = sessionmaker(bind=engine)
 
 Base = declarative_base()
+
+def get_db():
+    '''returns the connetion to database'''
+    db = SessionLocal()
+    try:
+        yield db
+    except Exception as e:
+        db.close()
+    finally:
+        db.close()
+
+def db_get():
+    return SessionLocal()
