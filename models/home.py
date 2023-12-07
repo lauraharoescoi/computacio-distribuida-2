@@ -4,7 +4,7 @@ from geoalchemy2 import Geometry
 from database import Base
 from sqlalchemy.orm import deferred
 
-from sqlalchemy.orm import Mapped
+from sqlalchemy.orm import Mapped, relationship
 
 class Home(Base):
     __tablename__ = "home"
@@ -14,9 +14,10 @@ class Home(Base):
     description: str = Column(String, unique=True, index=True)
     owner: int = Column(Integer, ForeignKey("user.id"))
     location = Column(Geometry('POINT'))
+    owner_relation = relationship("User", back_populates="homes")
     
-class HomeUser(Base):
-    __tablename__ = "home_user"
-    id: int = Column(Integer, primary_key=True, index=True)
-    home = Column(Integer, ForeignKey("home.id"))
-    user = Column(Integer, ForeignKey("user.id"))
+# class HomeUser(Base):
+#     __tablename__ = "home_user"
+#     id: int = Column(Integer, primary_key=True, index=True)
+#     home = Column(Integer, ForeignKey("home.id"))
+#     user = Column(Integer, ForeignKey("user.id"))

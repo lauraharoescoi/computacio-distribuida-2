@@ -1,2 +1,8 @@
 [POSTGRESQL]
 DB_URL = host://user:password@host:port/db_name
+
+[SECURITY]
+SECRET_KEY = secret key 
+ALGORITHM = algorithm
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SERVICE_TOKEN = secret token
