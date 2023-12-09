@@ -4,3 +4,4 @@ class TokenData:
     email: str = ''
     expt: int = 0
     is_admin: bool = False
+    id: int = 0  # Agrega esta línea si es relevante para tu aplicación

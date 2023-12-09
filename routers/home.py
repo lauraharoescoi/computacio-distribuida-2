@@ -2,8 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from database import get_db
 from security import get_data_from_token
-import services.home as home_service
-from schemas.home import RegisterHome, ModifyHome, DeleteHome, GetHomeById, SearchHome
+import services.Home as home_service
+from schemas.Home import RegisterHome, ModifyHome, DeleteHome, GetHomeById, SearchHome
 
 from utils.auth_bearer import JWTBearer
 
@@ -29,13 +29,13 @@ async def modify_home(payload: ModifyHome,
 async def delete_home(homeId: int,
                       db: Session = Depends(get_db),
                       token: str = Depends(JWTBearer())):
-    return await home_service.delete_home(db, payload, get_data_from_token(token))
+    return await home_service.delete_home(db, homeId, get_data_from_token(token))
 
 @router.post("/{homeId}", response_model=dict)
 async def get_home_by_id(homeId: int,
                          db: Session = Depends(get_db),
                          token: str = Depends(JWTBearer())):
-    return await home_service.get_home_by_id(db, homeId)
+    return await home_service.get_home_by_id(db, homeId, token)
 
 @router.post("/search", response_model=dict)
 async def search_home(payload: SearchHome,

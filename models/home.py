@@ -13,7 +13,8 @@ class Home(Base):
     address: str = Column(String, unique=True, index=True)
     description: str = Column(String, unique=True, index=True)
     owner: int = Column(Integer, ForeignKey("user.id"))
-    location = Column(Geometry('POINT'))
+    # location = Column(Geometry('POINT'))
+    location = Column(String, unique=True, index=True)
     owner_relation = relationship("User", back_populates="homes")
     
 # class HomeUser(Base):

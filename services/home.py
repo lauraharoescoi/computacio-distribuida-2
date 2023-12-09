@@ -3,7 +3,7 @@ from models.User import User
 
 from database import SessionLocal, engine
 
-from schemas.home import RegisterHome, ModifyHome, DeleteHome, GetHomeById, SearchHome
+from schemas.Home import RegisterHome, ModifyHome, DeleteHome, GetHomeById, SearchHome
 
 
 def register_home(db: SessionLocal, home: RegisterHome, user: User):

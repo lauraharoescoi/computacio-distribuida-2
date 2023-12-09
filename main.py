@@ -3,8 +3,8 @@ from fastapi.responses import RedirectResponse
 from starlette.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from routers import home
-from routers import user
+from routers import Home
+from routers import User
 
 from error import error_handler as eh
 from error.AuthenticationException import AuthenticationException
@@ -52,8 +52,8 @@ app.add_exception_handler(InputException, eh.input_exception_handler)
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-app.include_router(home.router)
-# app.include_router(user.router)
+app.include_router(Home.router)
+app.include_router(User.router)
 
 @app.get("/")
 def root():

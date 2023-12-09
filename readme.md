@@ -18,3 +18,9 @@ python3 -m alembic revision --autogenerate
 ```
 python3 -m alembic upgrade head
 ```
+
+## START API ##
+
+```
+python -m uvicorn main:app --reload
+```
