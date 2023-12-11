@@ -25,13 +25,13 @@ async def modify_home(payload: ModifyHome,
                       token: str = Depends(JWTBearer())):
     return await home_service.modify_home(db, payload, get_data_from_token(token))
 
-@router.post("/delete/{homeId}", response_model=dict)
+@router.delete("/{homeId}", response_model=dict)
 async def delete_home(homeId: int,
                       db: Session = Depends(get_db),
                       token: str = Depends(JWTBearer())):
     return await home_service.delete_home(db, homeId, get_data_from_token(token))
 
-@router.post("/{homeId}", response_model=dict)
+@router.get("/{homeId}", response_model=dict)
 async def get_home_by_id(homeId: int,
                          db: Session = Depends(get_db),
                          token: str = Depends(JWTBearer())):

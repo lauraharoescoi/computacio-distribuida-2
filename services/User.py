@@ -34,5 +34,12 @@ async def create_user(db: Session, user: UserCreate):
 
 
 async def delete_user(db: Session, userId: int):
-    return await db.query(ModelUser).filter(ModelUser.id == userId).delete()
+    try:
+        deleted_rows = await db.query(ModelUser).filter(ModelUser.id == userId).delete()
+        db.commit()
+        return deleted_rows
+    except Exception as e:
+        db.rollback()  # Rollback changes if an exception occurs
+        print(f"Error deleting user: {e}")
+        raise
 
