@@ -28,11 +28,12 @@ async def get_users(db: Session = Depends(get_db),
     }
 
 
-@router.get("/{userId}", response_model=dict)
+@router.get("/{userId}")
 async def get_user(userId: int,
                    db: Session = Depends(get_db),
                    token=Depends(JWTBearer())):
-    return await user_service.get_user(db, userId, get_data_from_token(token))
+    return await user_service.get_user(db, userId)
+    
 
 @router.post("/sign_up")
 async def create_user(payload: UserCreate,

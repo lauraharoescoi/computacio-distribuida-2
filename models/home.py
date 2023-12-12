@@ -9,13 +9,12 @@ from sqlalchemy.orm import Mapped, relationship
 class Home(Base):
     __tablename__ = "home"
     id: int = Column(Integer, primary_key=True, index=True)
-    name: str = Column(String, unique=True, index=True)
+    name: str = Column(String, unique=False, index=True)
     address: str = Column(String, unique=True, index=True)
-    description: str = Column(String, unique=True, index=True)
+    description: str = Column(String, unique=False, index=True)
     owner: int = Column(Integer, ForeignKey("user.id"))
     # location = Column(Geometry('POINT'))
-    location = Column(String, unique=True, index=True)
-    owner_relation = relationship("User", back_populates="homes")
+    location = Column(String, unique=False, index=True)
     
 # class HomeUser(Base):
 #     __tablename__ = "home_user"

@@ -6,7 +6,7 @@ from models.TokenData import TokenData
 
 from schemas.User import UserBase, UserCreate
 
-from utils.service_utils import check_image
+from utils.service_utils import check_image, set_existing_data
 from error.AuthenticationException import AuthenticationException
 from error.NotFoundException import NotFoundException
 
@@ -17,7 +17,7 @@ async def get_all(db: Session):
     return db.query(ModelUser).all()
 
 
-async def get_user(db: Session, userId: int, data: TokenData):
+async def get_user(db: Session, userId: int):
     user = db.query(ModelUser).filter(ModelUser.id == userId).first()
     if user is None:
         raise NotFoundException("User not found")
@@ -43,3 +43,11 @@ async def delete_user(db: Session, userId: int):
         print(f"Error deleting user: {e}")
         raise
 
+async def modify_user(db: Session, userId: int, user: UserBase):
+    db_user = db.query(ModelUser).filter(ModelUser.id == userId).first()
+    if db_user is None:
+        raise NotFoundException("User not found")
+    updated = set_existing_data(db_user, user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user

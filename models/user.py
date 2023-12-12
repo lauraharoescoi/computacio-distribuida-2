@@ -1,5 +1,5 @@
 from datetime import date
-from sqlalchemy import Column, DateTime, Integer, String, Boolean
+from sqlalchemy import Column, DateTime, Integer, String, Boolean, ForeignKey
 from database import Base
 from sqlalchemy.orm import deferred
 
@@ -11,4 +11,5 @@ class User(Base):
     username: str = Column(String, unique=True, index=True)
     password: Mapped[str] = deferred(Column(String))
     token: Mapped[str] = deferred(Column(String, default=""))
-    homes = relationship("Home", back_populates="owner_relation")
+
+    

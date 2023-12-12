@@ -12,35 +12,34 @@ router = APIRouter(
     tags=["Home"],
 )
 
-@router.post("/register", response_model=dict)
+@router.post("/")
 async def register_home(payload: RegisterHome,
-                        db: Session = Depends(get_db),
-                        token: str = Depends(JWTBearer())):
-    return await home_service.register_home(db, payload, get_data_from_token(token))
+                        db: Session = Depends(get_db)):
+    return await home_service.register_home(db, payload)
     
 
-@router.post("/modify", response_model=dict)
-async def modify_home(payload: ModifyHome,
+@router.put("/{homeId}")
+async def modify_home(homeId: int,
+                      payload: ModifyHome,
                       db: Session = Depends(get_db),
                       token: str = Depends(JWTBearer())):
-    return await home_service.modify_home(db, payload, get_data_from_token(token))
+    return await home_service.modify_home(db, homeId, payload)
 
-@router.delete("/{homeId}", response_model=dict)
+@router.delete("/{homeId}")
 async def delete_home(homeId: int,
-                      db: Session = Depends(get_db),
-                      token: str = Depends(JWTBearer())):
-    return await home_service.delete_home(db, homeId, get_data_from_token(token))
+                      db: Session = Depends(get_db)):
+    return await home_service.delete_home(db, homeId)
 
-@router.get("/{homeId}", response_model=dict)
+@router.get("/{homeId}")
 async def get_home_by_id(homeId: int,
-                         db: Session = Depends(get_db),
-                         token: str = Depends(JWTBearer())):
-    return await home_service.get_home_by_id(db, homeId, token)
+                         db: Session = Depends(get_db)):
+    return await home_service.get_home_by_id(db, homeId)
 
-@router.post("/search", response_model=dict)
-async def search_home(payload: SearchHome,
-                      db: Session = Depends(get_db),
-                      token: str = Depends(JWTBearer())):
-    return await home_service.search_home(db, payload)
+@router.get("/")
+async def get_all_homes(db: Session = Depends(get_db)):
+    return await home_service.get_all_homes(db)
 
-    
+@router.get("/search/{search}")
+async def search_home(search: str,
+                      db: Session = Depends(get_db)):
+    return await home_service.search_home(db, search)

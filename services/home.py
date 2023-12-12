@@ -1,53 +1,54 @@
-from models.Home import Home
+from models.Home import Home as ModelHome
 from models.User import User
+
+from utils.service_utils import set_existing_data
+from error.NotFoundException import NotFoundException
 
 from database import SessionLocal, engine
 
 from schemas.Home import RegisterHome, ModifyHome, DeleteHome, GetHomeById, SearchHome
 
 
-def register_home(db: SessionLocal, home: RegisterHome, user: User):
-    db_home = Home(name=home.name, address=home.address, description=home.description, owner=user.id, location=home.location)
+async def register_home(db: SessionLocal, home: RegisterHome):
+    db_home = ModelHome(name=home.name, address=home.address, description=home.description, owner=home.owner, location=home.location)
     db.add(db_home)
     db.commit()
     db.refresh(db_home)
     return db_home
 
-def modify_home(db: SessionLocal, home: ModifyHome, user: User):
-    db_home = db.query(Home).filter(Home.id == home.id).first()
-    if db_home.owner == user.id:
-        db_home.name = home.name
-        db_home.address = home.address
-        db_home.description = home.description
-        db.commit()
-        db.refresh(db_home)
-        return db_home
-    else:
-        return None
-
-def delete_home(db: SessionLocal, home: DeleteHome, user: User):
-    db_home = db.query(Home).filter(Home.id == home.id).first()
-    if db_home.owner == user.id:
-        db.delete(db_home)
-        db.commit()
-        return True
-    else:
-        return False
-
-def get_home_by_id(db: SessionLocal, home: GetHomeById):
-    db_home = db.query(Home).filter(Home.id == home.id).first()
+async def modify_home(db: SessionLocal, homeId: int, home: ModifyHome):
+    db_home = db.query(ModelHome).filter(ModelHome.id == homeId).first()
+    if db_home is None:
+        raise NotFoundException("Home not found")
+    updated = set_existing_data(db_home, home)
+    db.commit()
+    db.refresh(db_home)
     return db_home
 
-def search_home(db: SessionLocal, search: SearchHome):
-    db_home = db.query(Home).filter(Home.address.like("%" + search.text + "%") | Home.description.like("%" + search.text + "%")).all()
+async def delete_home(db: SessionLocal, homeId: int):
+    db_home = db.query(ModelHome).filter(ModelHome.id == homeId).first()
+    db.delete(db_home)
+    db.commit()
     return db_home
 
+async def get_home_by_id(db: SessionLocal, HomeId: GetHomeById):
+    db_home = db.query(ModelHome).filter(ModelHome.id == HomeId).first()
+    return db_home
 
-def list_homes_info(db: SessionLocal, home: GetHomeById):
+async def search_home(db: SessionLocal, search: str):
+    db_home = db.query(ModelHome).filter(ModelHome.address.like("%" + search + "%") | ModelHome.description.like("%" + search + "%")).all()
+    return db_home
+
+async def get_all_homes(db: SessionLocal):
+    db_homes = db.query(ModelHome).all()
+    return db_homes
+
+
+async def list_homes_info(db: SessionLocal, home: GetHomeById):
     if home.id == 0:
-        db_homes = db.query(Home).all()
+        db_homes = db.query(ModelHome).all()
         return db_homes
     else:
-        db_home = db.query(Home).filter(Home.id == home.id).first()
+        db_home = db.query(ModelHome).filter(ModelHome.id == home.id).first()
         return db_home
 

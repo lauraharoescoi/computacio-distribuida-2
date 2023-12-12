@@ -6,7 +6,6 @@ class UserBase(BaseModel):
     username: str
     password: str
     token: str
-    homes: List[int] = []
 
 class UserCreate(UserBase):
     username: str
