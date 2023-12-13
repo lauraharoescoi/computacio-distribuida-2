@@ -13,25 +13,16 @@ router = APIRouter(
     tags=["User"],
 )
 
-@router.get("/all", response_model=list)
+@router.get("/all")
 async def get_users(db: Session = Depends(get_db),
                     token: str = Depends(JWTBearer())):
     new_user = await user_service.get_all(db)
-    access_token, refresh_token = create_all_tokens(new_user,
-                                                    db,
-                                                    verification=True)
-    return {
-        "success": True,
-        "user_id": new_user.id,
-        "access_token": access_token,
-        "refresh_token": refresh_token
-    }
+    return new_user
 
 
 @router.get("/{userId}")
 async def get_user(userId: int,
-                   db: Session = Depends(get_db),
-                   token=Depends(JWTBearer())):
+                   db: Session = Depends(get_db)):
     return await user_service.get_user(db, userId)
     
 
@@ -44,7 +35,6 @@ async def create_user(payload: UserCreate,
 
 @router.delete("/{userId}")
 async def delete_user(userId: int,
-                      db: Session = Depends(get_db),
-                      token: str = Depends(JWTBearer())):
-    user_id = await user_service.delete_user(db, userId, get_data_from_token(token))
-    return {"success": True, "user_id": user_id}
+                      db: Session = Depends(get_db)):
+
+    return user_service.delete_user(db, userId)

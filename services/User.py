@@ -33,9 +33,9 @@ async def create_user(db: Session, user: UserCreate):
     return db_user
 
 
-async def delete_user(db: Session, userId: int):
+def delete_user(db: Session, userId: int):
     try:
-        deleted_rows = await db.query(ModelUser).filter(ModelUser.id == userId).delete()
+        deleted_rows = db.query(ModelUser).filter(ModelUser.id == userId).delete()
         db.commit()
         return deleted_rows
     except Exception as e:

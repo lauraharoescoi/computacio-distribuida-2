@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from security import get_data_from_token
 import services.Home as home_service
-from schemas.Home import RegisterHome, ModifyHome, DeleteHome, GetHomeById, SearchHome
+from schemas.Home import RegisterHome, ModifyHome
 
 from utils.auth_bearer import JWTBearer
 
@@ -21,8 +21,7 @@ async def register_home(payload: RegisterHome,
 @router.put("/{homeId}")
 async def modify_home(homeId: int,
                       payload: ModifyHome,
-                      db: Session = Depends(get_db),
-                      token: str = Depends(JWTBearer())):
+                      db: Session = Depends(get_db)):
     return await home_service.modify_home(db, homeId, payload)
 
 @router.delete("/{homeId}")
