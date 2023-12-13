@@ -11,7 +11,7 @@ from utils.auth_bearer import JWTBearer
 
 router = APIRouter(
     prefix="/room",
-    tags=["room"],
+    tags=["Room"],
     responses={404: {"description": "Not found"}},
 )
 

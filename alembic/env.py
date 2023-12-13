@@ -2,6 +2,9 @@ from logging.config import fileConfig
 
 from sqlalchemy import engine_from_config
 from sqlalchemy import pool
+from geoalchemy2 import types as geoalchemy2_types
+
+
 
 from alembic import context
 from database import Base

@@ -52,3 +52,6 @@ async def list_homes_info(db: SessionLocal, home: GetHomeById):
         db_home = db.query(ModelHome).filter(ModelHome.id == home.id).first()
         return db_home
 
+async def get_homes_by_user(db: SessionLocal, user: User):
+    db_home = db.query(ModelHome).filter(ModelHome.owner == user.id).all()
+    return db_home

@@ -31,8 +31,8 @@ tags_metadata = [
 ]
 
 app = FastAPI(
-    title="Home Finder API",
-    description="This is the API for the Home Finder App",
+    title="MyClimate API",
+    description="This is the API for the MyClimate App",
     version="0.0.1",
     openapi_tags=tags_metadata,
     docs_url="/docs",

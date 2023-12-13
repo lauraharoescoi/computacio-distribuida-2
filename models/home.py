@@ -13,8 +13,8 @@ class Home(Base):
     address: str = Column(String, unique=True, index=True)
     description: str = Column(String, unique=False, index=True)
     owner: int = Column(Integer, ForeignKey("user.id"))
-    # location = Column(Geometry('POINT'))
-    location = Column(String, unique=False, index=True)
+    location = Column(Geometry('POINT'))
+    #location = Column(String, unique=False, index=True)
     
 # class HomeUser(Base):
 #     __tablename__ = "home_user"

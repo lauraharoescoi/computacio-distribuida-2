@@ -8,7 +8,6 @@ def user_show_private(user: ModelUser):
     user.email
     user.telephone
     user.address
-    user.shirt_size
     user.code
     user.food_restrictions
 

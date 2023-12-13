@@ -42,3 +42,8 @@ async def get_all_homes(db: Session = Depends(get_db)):
 async def search_home(search: str,
                       db: Session = Depends(get_db)):
     return await home_service.search_home(db, search)
+
+@router.get("/{userId}") 
+async def get_homes_by_user(userId: int,
+                            db: Session = Depends(get_db)):
+    return await home_service.get_homes_by_user(db, userId)
