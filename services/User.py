@@ -4,9 +4,10 @@ from security import get_password_hash
 from models.User import User as ModelUser
 from models.TokenData import TokenData
 
-from schemas.User import UserBase, UserCreate
+from schemas.User import User
 
-from utils.service_utils import check_image, set_existing_data
+from utils.service_utils import set_existing_data
+from utils.service_utils import check_user
 from error.AuthenticationException import AuthenticationException
 from error.NotFoundException import NotFoundException
 
@@ -24,7 +25,8 @@ async def get_user(db: Session, userId: int):
     return user
 
 
-async def create_user(db: Session, user: UserCreate):
+async def create_user(db: Session, user: User):
+    await check_user(db, user.username)
     db_user = ModelUser(username=user.username,
                         password=get_password_hash(user.password))
     db.add(db_user)
@@ -33,7 +35,10 @@ async def create_user(db: Session, user: UserCreate):
     return db_user
 
 
-def delete_user(db: Session, userId: int):
+def delete_user(db: Session, userId: int, token: TokenData):
+    if not token.is_admin:
+        if not (token.user_id == userId):
+            raise AuthenticationException("This user does't own this user")
     try:
         deleted_rows = db.query(ModelUser).filter(ModelUser.id == userId).delete()
         db.commit()
@@ -43,7 +48,7 @@ def delete_user(db: Session, userId: int):
         print(f"Error deleting user: {e}")
         raise
 
-async def modify_user(db: Session, userId: int, user: UserBase):
+async def modify_user(db: Session, userId: int, user: User):
     db_user = db.query(ModelUser).filter(ModelUser.id == userId).first()
     if db_user is None:
         raise NotFoundException("User not found")

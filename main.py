@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from routers import Home
 from routers import User
 from routers import Room
+from routers import Authentication
 
 from error import error_handler as eh
 from error.AuthenticationException import AuthenticationException
@@ -18,7 +19,7 @@ from error.InputException import InputException
 tags_metadata = [
     {
         "name": "User",
-        "description": "Operations with users. The **login** logic is also here.",
+        "description": "Operations with users.",
     },
     {
         "name": "Home",
@@ -27,7 +28,11 @@ tags_metadata = [
     {
         "name": "Room",
         "description": "Operations with rooms.",
-    }
+    },
+    {
+        "name": "Authentication",
+        "description": "Authentication related endpoints"
+    },
 ]
 
 app = FastAPI(
@@ -60,6 +65,7 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(Home.router)
 app.include_router(User.router)
 app.include_router(Room.router)
+app.include_router(Authentication.router)
 
 @app.get("/")
 def root():

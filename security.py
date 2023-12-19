@@ -54,8 +54,6 @@ def verify_token(token: str, db: Session):
         return True
     dict = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
     user = get_user(dict["user_id"], db)
-    if user.type != dict["type"]:
-        raise AuthenticationException("Invalid token")
     if user.token != token:
         raise AuthenticationException("Invalid token")
     # Here your code for verifying the token or whatever you use
@@ -67,18 +65,12 @@ def verify_token(token: str, db: Session):
 def update_tokens(user_id: int,
                   db: Session,
                   access_token: str = None,
-                  refresh_token: str = None,
-                  verification_token: str = None,
-                  reset_pass_token: str = None):
+                  refresh_token: str = None):
     user = get_user(user_id, db)
     if access_token is not None:
         user.token = access_token
     if refresh_token is not None:
         user.refresh_token = refresh_token
-    if verification_token is not None:
-        user.verification_token = verification_token
-    if reset_pass_token is not None:
-        user.rest_password_token = reset_pass_token
     db.commit()
     db.refresh(user)
 
@@ -88,10 +80,9 @@ def create_access_token(user: ModelUser,
                         expires_delta: timedelta = None):
     to_encode = {
         'user_id': user.id,
-        'email': user.email,
-        'type': user.type,
+        'username': user.username,
     }
-    # return "test- "+ ACCESS_TOKEN_EXPIRE_MINUTES
+
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
     else:
@@ -110,37 +101,9 @@ def create_access_token(user: ModelUser,
 def create_refresh_token(user: ModelUser,
                          db: Session,
                          expires_delta: timedelta = None):
-    to_encode = {'user_id': user.id, 'email': user.email, 'type': user.type}
+    to_encode = {'user_id': user.id, 'username': user.username}
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     update_tokens(user.id, db, refresh_token=encoded_jwt)
-    return encoded_jwt
-
-
-def create_verification_token(user: ModelUser, db: Session):
-    to_encode = {'user_id': user.id, 'type': user.type}
-    #expire in 10 minutes
-    expire = datetime.utcnow() + timedelta(minutes=10)
-    to_encode.update({"expt": expire.isoformat()})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    update_tokens(user.id, db, verification_token=encoded_jwt)
-    return encoded_jwt
-
-
-def create_reset_password_token(user: ModelUser, db: Session):
-    to_encode = {'user_id': user.id, 'type': user.type}
-    #expire in 10 minutes
-    expire = datetime.utcnow() + timedelta(minutes=10)
-    to_encode.update({"expt": expire.isoformat()})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    update_tokens(user.id, db, reset_pass_token=encoded_jwt)
-
-
-def generate_assistance_token(user_id: int, event_id: int, db: Session):
-    to_encode = {'user_id': user_id, 'event_id': event_id}
-    #expire in 5 days
-    expire = datetime.utcnow() + timedelta(days=5)
-    to_encode.update({"expt": expire.isoformat()})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
 
@@ -154,19 +117,12 @@ def get_data_from_token(token: str = Depends(oauth2_scheme),
         d.user_id = 0
         d.available = True
         d.type = "service"
-        d.email = ""
+        d.username = ""
         return d
     data = decode_token(token)
     d.user_id = data.get("user_id")
     d.expt = data.get("expt")
-    d.type = data.get("type")
-    if not special:
-        d.email = data.get("email")
-    else:
-        try:
-            d.event_id = data.get("event_id")
-        except:
-            pass
+    d.username = data.get("username")
     return d
 
 
@@ -176,30 +132,8 @@ def decode_token(token):
                       algorithms=[ALGORITHM])
 
 
-# async def check_permissions(token: str, permission: List):
-#     if token.credentials == SERVICE_TOKEN:
-#         return True
-#     jwt_token = jwt.decode(token.credentials.encode('utf-8'),
-#                            SECRET_KEY,
-#                            algorithms=[ALGORITHM])
-#     if jwt_token["type"] not in permission and parser.parse(
-#             jwt_token['expt']) < datetime.utcnow():
-#         raise HTTPException(
-#             status_code=status.HTTP_403_FORBIDDEN,
-#             detail="Insufficient permissions",
-#             headers={"WWW-Authenticate": "Bearer"},
-#         )
-
-
 def create_all_tokens(user: ModelUser,
-                      db: Session,
-                      reset_password: bool = False,
-                      verification: bool = False):
-    if reset_password:
-        create_reset_password_token(user, db)
-        return
-    if not user.is_verified and verification:
-        create_verification_token(user, db)
+                      db: Session):
     access_token = create_access_token(user, db)
     refresh_token = create_refresh_token(user, db)
     return access_token, refresh_token

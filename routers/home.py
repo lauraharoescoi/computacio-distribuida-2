@@ -21,13 +21,15 @@ async def register_home(payload: RegisterHome,
 @router.put("/{homeId}")
 async def modify_home(homeId: int,
                       payload: ModifyHome,
-                      db: Session = Depends(get_db)):
-    return await home_service.modify_home(db, homeId, payload)
+                      db: Session = Depends(get_db),
+                      token: str = Depends(JWTBearer())):
+    return await home_service.modify_home(db, homeId, payload, get_data_from_token(token))
 
 @router.delete("/{homeId}")
 async def delete_home(homeId: int,
-                      db: Session = Depends(get_db)):
-    return await home_service.delete_home(db, homeId)
+                      db: Session = Depends(get_db),
+                      token: str = Depends(JWTBearer())):
+    return await home_service.delete_home(db, homeId, get_data_from_token(token))
 
 @router.get("/{homeId}")
 async def get_home_by_id(homeId: int,

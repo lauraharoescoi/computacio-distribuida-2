@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from database import get_db
 from security import get_data_from_token
-from schemas.Room import RegisterRoom, ModifyRoom
+from schemas.Room import Room, ModifyRoom
 import services.Room as room_service
 
 from utils.auth_bearer import JWTBearer
@@ -16,20 +16,22 @@ router = APIRouter(
 )
 
 @router.post("/register")
-async def register(room: RegisterRoom, 
+async def register(room: Room, 
                    db: Session = Depends(get_db)):
     return await room_service.register_room(db, room)
 
 @router.put("/{roomId}")
 async def modify(roomId: int, 
                  room: ModifyRoom, 
-                 db: Session = Depends(get_db)):
-    return await room_service.modify_room(db, roomId, room)
+                 db: Session = Depends(get_db),
+                 data: dict = Depends(JWTBearer())):
+    return await room_service.modify_room(db, roomId, room, get_data_from_token(data))
 
 @router.delete("/{roomId}")
 async def delete(roomId: int, 
-                 db: Session = Depends(get_db)):
-    return await room_service.delete_room(db, roomId)
+                 db: Session = Depends(get_db),
+                 data: dict = Depends(JWTBearer())):
+    return await room_service.delete_room(db, roomId, get_data_from_token(data))
 
 @router.get("/{roomId}")
 async def get_by_id(roomId: int, 

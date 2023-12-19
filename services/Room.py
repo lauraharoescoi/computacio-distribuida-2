@@ -1,32 +1,50 @@
 from models.Home import Home as ModelHome
 from models.User import User as ModelUser
 from models.Room import Room as ModelRoom
+from models.TokenData import TokenData
 
 from utils.service_utils import set_existing_data
 from error.NotFoundException import NotFoundException
 
 from database import SessionLocal, engine
 
-from schemas.Room import RegisterRoom, ModifyRoom, SearchRoom
+from schemas.Room import Room, ModifyRoom
 
-async def register_room(db: SessionLocal, room: RegisterRoom):
+async def register_room(db: SessionLocal, room: Room):
+    db_home = db.query(ModelHome).filter(ModelHome.id == room.home).first()
+    if db_home is None:
+        raise NotFoundException("Home not found")
     db_room = ModelRoom(name=room.name, home=room.home, sensor=room.sensor)
     db.add(db_room)
     db.commit()
     db.refresh(db_room)
     return db_room
 
-async def modify_room(db: SessionLocal, roomId: int, room: ModifyRoom):
+async def modify_room(db: SessionLocal, roomId: int, room: ModifyRoom, data: TokenData):
     db_room = db.query(ModelRoom).filter(ModelRoom.id == roomId).first()
     if db_room is None:
         raise NotFoundException("Room not found")
+    db_home = db.query(ModelHome).filter(ModelHome.id == db_room.home).first()
+    if db_home is None:
+        raise NotFoundException("Room without a home")
+    if not data.is_admin:
+        if not (data.user_id == db_home.owner):
+            raise NotFoundException("This user does't own this room")
     updated = set_existing_data(db_room, room)
     db.commit()
     db.refresh(db_room)
     return db_room
 
-async def delete_room(db: SessionLocal, roomId: int):
+async def delete_room(db: SessionLocal, roomId: int, data: TokenData):
     db_room = db.query(ModelRoom).filter(ModelRoom.id == roomId).first()
+    if db_room is None:
+        raise NotFoundException("Room not found")
+    db_home = db.query(ModelHome).filter(ModelHome.id == db_room.home).first()
+    if db_home is None:
+        raise NotFoundException("Room without a home")
+    if not data.is_admin:
+        if not (data.user_id == db_home.owner):
+            raise NotFoundException("This user does't own this room")
     db.delete(db_room)
     db.commit()
     return db_room
