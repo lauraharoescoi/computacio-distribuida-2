@@ -14,10 +14,3 @@ class Home(Base):
     description: str = Column(String, unique=False, index=True)
     owner: int = Column(Integer, ForeignKey("user.id"))
     location = Column(Geometry('POINT'))
-    #location = Column(String, unique=False, index=True)
-    
-# class HomeUser(Base):
-#     __tablename__ = "home_user"
-#     id: int = Column(Integer, primary_key=True, index=True)
-#     home = Column(Integer, ForeignKey("home.id"))
-#     user = Column(Integer, ForeignKey("user.id"))

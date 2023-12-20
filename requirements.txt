@@ -7,4 +7,6 @@ uvicorn
 python-jose
 passlib
 starlette==0.19.1
-
+shapely
+plotly
+kaleido

@@ -9,19 +9,25 @@ from error.NotFoundException import NotFoundException
 from error.AuthenticationException import AuthenticationException
 from shapely import from_wkb
 
-from fastapi.responses import Response
-
+from fastapi.responses import Response, HTMLResponse
+import os
 import pandas as pd 
 import plotly.express as px
 
 from database import SessionLocal, engine
 
 from schemas.Home import RegisterHome, ModifyHome
+from geoalchemy2 import WKTElement
+
+
+
 
 
 async def register_home(db: SessionLocal, home: RegisterHome):
     await check_home(db, home.address)
-    db_home = ModelHome(name=home.name, address=home.address, description=home.description, owner=home.owner, location=home.location)
+    lat, lon = home.location
+    location_wkt = WKTElement(f'POINT({lon} {lat})')
+    db_home = ModelHome(name=home.name, address=home.address, description=home.description, owner=home.owner, location=location_wkt)
     db.add(db_home)
     db.commit()
     db.refresh(db_home)
@@ -29,12 +35,12 @@ async def register_home(db: SessionLocal, home: RegisterHome):
     return db_home
 
 async def modify_home(db: SessionLocal, homeId: int, home: ModifyHome, data: TokenData):
-    if not data.is_admin:
-        if not (data.user_id == homeId):
-            raise AuthenticationException("This user does't own this home")
     db_home = db.query(ModelHome).filter(ModelHome.id == homeId).first()
     if db_home is None:
         raise NotFoundException("Home not found")
+    if not data.is_admin:
+        if not (data.user_id == db_home.owner):
+            raise AuthenticationException("This user does't own this home")
     updated = set_existing_data(db_home, home)
     db.commit()
     db.refresh(db_home)
@@ -42,10 +48,12 @@ async def modify_home(db: SessionLocal, homeId: int, home: ModifyHome, data: Tok
     return db_home
 
 async def delete_home(db: SessionLocal, homeId: int, data: TokenData):
-    if not data.is_admin:
-        if not (data.user_id == homeId):
-            raise AuthenticationException("This user does't own this home")
     db_home = db.query(ModelHome).filter(ModelHome.id == homeId).first()
+    if db_home is None:
+        raise NotFoundException("Home not found")
+    if not data.is_admin:
+        if not (data.user_id == db_home.owner):
+            raise AuthenticationException("This user does't own this home")
     db.delete(db_home)
     db.commit()
     db_home.location = str(from_wkb(str(db_home.location)))
@@ -84,16 +92,100 @@ async def get_homes_by_user(db: SessionLocal, user: int):
     return db_home
 
 async def get_home_map(db: SessionLocal, homeId: int):
-    db_home = db.query(ModelHome).filter(ModelHome.id == homeId).first()
-    db_home.location = str(from_wkb(str(db_home.location)))
-    lat = db_home.location.split(" ")[1].replace("(", "")
-    long = db_home.location.split(" ")[2].replace(")", "")
-    df = pd.DataFrame({'Lat': [int(lat)], 'Long': [int(long)]})
-    fig = px.scatter_mapbox(df, lat="Lat", lon="Long", zoom=10)
-    fig.update_layout(mapbox_style="open-street-map")
-    fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
-    fig.write_image("/static/map.png") 
-    # fig.write_html("static/map.html")
-    with open("static/map.png", "r", encoding='utf8') as f:
-        img = f.read()
-    return Response(img, media_type="image/png")
+    try:
+        # Obtener datos de la base de datos
+        db_home = db.query(ModelHome).filter(ModelHome.id == homeId).first()
+        if not db_home:
+            raise ValueError(f"No se encontró la casa con ID {homeId}")
+
+        db_home.location = str(from_wkb(str(db_home.location)))
+        lat = db_home.location.split(" ")[1].replace("(", "")
+        long = db_home.location.split(" ")[2].replace(")", "")
+        df = pd.DataFrame({'Lat': [float(lat)], 'Long': [float(long)]})
+
+        # Ruta del archivo
+        file_path = "./static/map_all.html"
+        
+        await generate_map(df, file_path)
+    except Exception as e:
+        # Error al generar el mapa
+        print(f"Error al generar el mapa: {e}")
+
+    try:
+        # Leer y devolver la imagen
+        with open(file_path, "rb") as f:
+            img = f.read()
+        return HTMLResponse(content=img, media_type="text/html")
+    except Exception as e:
+        # Error al leer el archivo
+        print(f"Error al leer el archivo: {e}")
+
+
+async def get_all_homes_map(db: SessionLocal):
+    try:
+        # Obtener datos de varias casas de la base de datos
+        db_homes = db.query(ModelHome).all()  # O ajusta esta consulta según tus necesidades
+        if not db_homes:
+            raise ValueError("No se encontraron casas")
+
+        # Preparar los datos para Plotly
+        data = []
+        for home in db_homes:
+            location = str(from_wkb(str(home.location)))
+            lat = location.split(" ")[1].replace("(", "")
+            long = location.split(" ")[2].replace(")", "")
+            data.append({'Lat': float(lat), 'Long': float(long)})
+
+        df = pd.DataFrame(data)
+        file_path = "./static/map_all.html"
+        await generate_map(df, file_path)
+    except Exception as e:
+        print(f"Error al generar el mapa: {e}")
+
+    try:
+        with open(file_path, "rb") as f:
+            img = f.read()
+        return HTMLResponse(content=img, media_type="text/html")
+    except Exception as e:
+        print(f"Error al leer el archivo: {e}")
+        
+
+async def get_homes_map_by_user(db: SessionLocal, user: int):
+    try:
+        # Obtener datos de varias casas de la base de datos
+        db_homes = db.query(ModelHome).filter(ModelHome.owner == user).all()  # O ajusta esta consulta según tus necesidades
+        if not db_homes:
+            raise ValueError("No se encontraron casas")
+
+        # Preparar los datos para Plotly
+        data = []
+        for home in db_homes:
+            location = str(from_wkb(str(home.location)))
+            lat = location.split(" ")[1].replace("(", "")
+            long = location.split(" ")[2].replace(")", "")
+            data.append({'Lat': float(lat), 'Long': float(long)})
+
+        df = pd.DataFrame(data)
+        file_path = "./static/map_by_user.html"
+        await generate_map(df, file_path)
+    except Exception as e:
+        print(f"Error al generar el mapa: {e}")
+
+    try:
+        with open(file_path, "rb") as f:
+            img = f.read()
+        return HTMLResponse(content=img, media_type="text/html")
+    except Exception as e:
+        print(f"Error al leer el archivo: {e}")
+    
+       
+async def generate_map(df, file_path):
+    try:
+        fig = px.scatter_mapbox(df, lat="Lat", lon="Long", zoom=10)
+        fig.update_layout(mapbox_style="open-street-map")
+        fig.update_layout(margin={"r":0,"t":0,"l":0,"b":0})
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        fig.write_html(file_path)
+    except Exception as e:
+        print(f"Error al generar el mapa: {e}")
+        raise e

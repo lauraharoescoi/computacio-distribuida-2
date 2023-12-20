@@ -16,8 +16,7 @@ class RegisterHome(BaseModel):
     address: constr(min_length=1, max_length=100)
     description: constr(min_length=1, max_length=500)
     owner: int
-    location: Annotated[str, WKBElement] = Field('POINT (3 5)')
-
+    location: conlist(float, min_items=2, max_items=2)  # Lista de dos flotantes para latitud y longitud
 
 class ModifyHome(BaseModel):
     name: Optional[constr(min_length=1, max_length=50)]

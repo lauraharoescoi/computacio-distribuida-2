@@ -54,3 +54,12 @@ async def get_homes_by_user(userId: int,
 async def get_home_map(homeId: int,
                        db: Session = Depends(get_db)):
     return await home_service.get_home_map(db, homeId)
+
+@router.get("/all/map")
+async def get_all_homes_map(db: Session = Depends(get_db)):
+    return await home_service.get_all_homes_map(db)
+
+@router.get("/all/map/{userId}")
+async def get_homes_map_by_user(userId: int,
+                                db: Session = Depends(get_db)):
+    return await home_service.get_homes_map_by_user(db, userId)
