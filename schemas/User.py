@@ -1,13 +1,7 @@
 from typing import List
 from pydantic import BaseModel
 
-class UserBase(BaseModel):
-    id: int
-    username: str
-    password: str
-    token: str
-
-class UserCreate(UserBase):
+class User(BaseModel):
     username: str
     password: str
 

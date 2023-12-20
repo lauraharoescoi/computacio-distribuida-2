@@ -6,7 +6,7 @@ from security import get_data_from_token, create_all_tokens
 import services.User as user_service
 from utils.auth_bearer import JWTBearer
 
-from schemas.User import UserBase, UserCreate
+from schemas.User import User
 
 router = APIRouter(
     prefix="/user",
@@ -14,8 +14,7 @@ router = APIRouter(
 )
 
 @router.get("/all")
-async def get_users(db: Session = Depends(get_db),
-                    token: str = Depends(JWTBearer())):
+async def get_users(db: Session = Depends(get_db)):
     new_user = await user_service.get_all(db)
     return new_user
 
@@ -27,14 +26,15 @@ async def get_user(userId: int,
     
 
 @router.post("/sign_up")
-async def create_user(payload: UserCreate,
-                db: Session = Depends(get_db),
-                token: str = Depends(JWTBearer())):
+async def create_user(payload: User,
+                db: Session = Depends(get_db)):
+    print(payload)
     return await user_service.create_user(db, payload)
 
 
 @router.delete("/{userId}")
 async def delete_user(userId: int,
-                      db: Session = Depends(get_db)):
-
-    return user_service.delete_user(db, userId)
+                      db: Session = Depends(get_db),
+                      token: str = Depends(JWTBearer())):
+    print(userId)
+    return user_service.delete_user(db, userId, get_data_from_token(token))
