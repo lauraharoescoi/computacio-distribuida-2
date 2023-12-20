@@ -63,3 +63,7 @@ async def get_all_homes_map(db: Session = Depends(get_db)):
 async def get_homes_map_by_user(userId: int,
                                 db: Session = Depends(get_db)):
     return await home_service.get_homes_map_by_user(db, userId)
+
+@router.get("/homes/nearby/map")
+async def get_homes_nearby_map(latitude: float, longitude: float, radius: float, db: Session = Depends(get_db)):
+    return await home_service.get_homes_nearby_map(db, latitude, longitude, radius)
