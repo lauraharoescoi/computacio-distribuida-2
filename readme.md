@@ -1,3 +1,11 @@
+## CONFIGURE DB ##
+```
+docker compose up -d --build
+```
+```
+CREATE EXTENSION postgis; //inside the database
+```
+
 ## START DB ##
 
 ```
@@ -17,4 +25,10 @@ python3 -m alembic revision --autogenerate
 ```
 ```
 python3 -m alembic upgrade head
+```
+
+## START API ##
+
+```
+python -m uvicorn main:app --reload
 ```

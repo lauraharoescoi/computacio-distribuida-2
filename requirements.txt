@@ -1,6 +1,12 @@
 alembic
-fastapi
+fastapi==0.79.0
 sqlalchemy
 geoalchemy2
 psycopg2-binary
 uvicorn
+python-jose
+passlib
+starlette==0.19.1
+shapely
+plotly
+kaleido
