@@ -4,15 +4,25 @@ import base64
 
 from error.ValidationException import ValidationException
 from models.User import User
+from models.Home import Home
 
 
 def get_user_by_username(db, username):
     return db.query(User).filter(User.username == username).first()
 
 
+def get_home_by_address(db, address):
+    return db.query(Home).filter(Home.address == address).first()
+
+
 async def check_user(db, username):
     if get_user_by_username(db, username) is not None:
         raise ValidationException("Username already exists")
+    
+
+async def check_home(db, name):
+    if get_home_by_address(db, name) is not None:
+        raise ValidationException("Home already exists")
 
 
 def set_existing_data(db_obj, req_obj):

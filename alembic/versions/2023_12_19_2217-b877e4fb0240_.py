@@ -25,7 +25,8 @@ def upgrade() -> None:
     op.alter_column('home', 'location',
                existing_type=sa.VARCHAR(),
                type_=geoalchemy2.types.Geometry(geometry_type='POINT', from_text='ST_GeomFromEWKT', name='geometry'),
-               existing_nullable=True)
+               existing_nullable=True,
+               postgresql_using='location::geometry')
     op.drop_index('ix_home_location', table_name='home')
     op.create_index('idx_home_location', 'home', ['location'], unique=False, postgresql_using='gist')
     op.drop_constraint('room_home_fkey', 'room', type_='foreignkey')

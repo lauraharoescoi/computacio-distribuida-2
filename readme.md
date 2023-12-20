@@ -1,3 +1,11 @@
+## CONFIGURE DB ##
+```
+docker compose up -d --build
+```
+```
+CREATE EXTENSION postgis; //inside the database
+```
+
 ## START DB ##
 
 ```

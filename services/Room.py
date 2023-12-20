@@ -5,6 +5,7 @@ from models.TokenData import TokenData
 
 from utils.service_utils import set_existing_data
 from error.NotFoundException import NotFoundException
+from error.AuthenticationException import AuthenticationException
 
 from database import SessionLocal, engine
 
@@ -29,7 +30,7 @@ async def modify_room(db: SessionLocal, roomId: int, room: ModifyRoom, data: Tok
         raise NotFoundException("Room without a home")
     if not data.is_admin:
         if not (data.user_id == db_home.owner):
-            raise NotFoundException("This user does't own this room")
+            raise AuthenticationException("This user does't own this room")
     updated = set_existing_data(db_room, room)
     db.commit()
     db.refresh(db_room)
@@ -44,7 +45,7 @@ async def delete_room(db: SessionLocal, roomId: int, data: TokenData):
         raise NotFoundException("Room without a home")
     if not data.is_admin:
         if not (data.user_id == db_home.owner):
-            raise NotFoundException("This user does't own this room")
+            raise AuthenticationException("This user does't own this room")
     db.delete(db_room)
     db.commit()
     return db_room
