@@ -1,12 +1,12 @@
-from fastapi import FastAPI, Request
+from fastapi import FastAPI
 from fastapi.responses import RedirectResponse
 from starlette.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from routers import Home
-from routers import User
-from routers import Room
-from routers import Authentication
+from Home import HomeRouter as Home
+from User import UserRouter as User
+from Room import RoomRouter as Room
+from Authentication import AuthenticationRouter as Authentication
 
 from error import error_handler as eh
 from error.AuthenticationException import AuthenticationException

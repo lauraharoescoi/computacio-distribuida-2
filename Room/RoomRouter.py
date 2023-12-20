@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from database import get_db
 from security import get_data_from_token
-from schemas.Room import Room, ModifyRoom
-import services.Room as room_service
+from Room.RoomSchema import Room, ModifyRoom
+import Room.RoomService as room_service
 
 from utils.auth_bearer import JWTBearer
 

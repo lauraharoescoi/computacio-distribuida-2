@@ -1,17 +1,15 @@
 from sqlalchemy.orm import Session
 from security import get_password_hash
 
-from models.User import User as ModelUser
+from User.UserModel import User as ModelUser
 from models.TokenData import TokenData
 
-from schemas.User import User
+from User.UserSchema import User
 
 from utils.service_utils import set_existing_data
 from utils.service_utils import check_user
 from error.AuthenticationException import AuthenticationException
 from error.NotFoundException import NotFoundException
-
-from utils.hide_utils import user_show_private
 
 
 async def get_all(db: Session):

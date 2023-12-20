@@ -1,9 +1,5 @@
-from datetime import date
-from sqlalchemy import Column, DateTime, Integer, String, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey
 from database import Base
-from sqlalchemy.orm import deferred
-
-from sqlalchemy.orm import Mapped
 
 class Room(Base):
     __tablename__ = "room"

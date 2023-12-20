@@ -1,12 +1,12 @@
-from fastapi import Depends, Response, APIRouter
+from fastapi import Depends, APIRouter
 from sqlalchemy.orm import Session
 
 from database import get_db
-from security import get_data_from_token, create_all_tokens
-import services.User as user_service
+from security import get_data_from_token
+import User.UserService as user_service
 from utils.auth_bearer import JWTBearer
 
-from schemas.User import User
+from User.UserSchema import User
 
 router = APIRouter(
     prefix="/user",

@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from security import get_data_from_token, sec
 from database import get_db
-from services import Authentication as auth_service
+from Authentication import AuthenticationService as auth_service
 from utils.auth_bearer import JWTBearer
 
 router = APIRouter(

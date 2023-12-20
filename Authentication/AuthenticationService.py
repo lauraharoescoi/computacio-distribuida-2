@@ -1,13 +1,11 @@
-from datetime import datetime
 from sqlalchemy.orm import Session
 from fastapi import Depends
 from database import get_db
-from models.User import User as ModelUser
-from models.TokenData import TokenData
+from User.UserModel import User as ModelUser
 
-from security import create_all_tokens, get_data_from_token, get_password_hash, verify_password
 
-from error.InputException import InputException
+from security import create_all_tokens, get_data_from_token, verify_password
+
 from error.InvalidDataException import InvalidDataException
 from error.AuthenticationException import AuthenticationException
 

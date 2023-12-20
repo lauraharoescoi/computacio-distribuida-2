@@ -1,9 +1,8 @@
-from datetime import date
-from sqlalchemy import Column, DateTime, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String
 from database import Base
 from sqlalchemy.orm import deferred
 
-from sqlalchemy.orm import Mapped, relationship
+from sqlalchemy.orm import Mapped
 
 class User(Base):
     __tablename__ = "user"

@@ -3,8 +3,8 @@ import random
 import base64
 
 from error.ValidationException import ValidationException
-from models.User import User
-from models.Home import Home
+from User.UserModel import User
+from Home.HomeModel import Home
 
 
 def get_user_by_username(db, username):

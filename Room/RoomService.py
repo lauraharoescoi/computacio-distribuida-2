@@ -1,15 +1,14 @@
-from models.Home import Home as ModelHome
-from models.User import User as ModelUser
-from models.Room import Room as ModelRoom
+from Home.HomeModel import Home as ModelHome
+from Room.RoomModel import Room as ModelRoom
 from models.TokenData import TokenData
 
 from utils.service_utils import set_existing_data
 from error.NotFoundException import NotFoundException
 from error.AuthenticationException import AuthenticationException
 
-from database import SessionLocal, engine
+from database import SessionLocal
 
-from schemas.Room import Room, ModifyRoom
+from Room.RoomSchema import Room, ModifyRoom
 
 async def register_room(db: SessionLocal, room: Room):
     db_home = db.query(ModelHome).filter(ModelHome.id == room.home).first()

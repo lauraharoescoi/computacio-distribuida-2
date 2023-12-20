@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from database import get_db
 from security import get_data_from_token
-import services.Home as home_service
-from schemas.Home import RegisterHome, ModifyHome
+import Home.HomeService as home_service
+from Home.HomeSchema import RegisterHome, ModifyHome
 
 from utils.auth_bearer import JWTBearer
 
@@ -51,19 +51,19 @@ async def get_homes_by_user(userId: int,
     return await home_service.get_homes_by_user(db, userId)
 
 @router.get("/map/{homeId}")
-async def get_home_map(homeId: int,
+async def get_home_map_by_home_id(homeId: int,
                        db: Session = Depends(get_db)):
     return await home_service.get_home_map(db, homeId)
 
-@router.get("/all/map")
+@router.get("/map/all")
 async def get_all_homes_map(db: Session = Depends(get_db)):
     return await home_service.get_all_homes_map(db)
 
-@router.get("/all/map/{userId}")
+@router.get("/map/all/{userId}")
 async def get_homes_map_by_user(userId: int,
                                 db: Session = Depends(get_db)):
     return await home_service.get_homes_map_by_user(db, userId)
 
-@router.get("/homes/nearby/map")
+@router.get("/map/nearby/{latitude}/{longitude}/{radius}")
 async def get_homes_nearby_map(latitude: float, longitude: float, radius: float, db: Session = Depends(get_db)):
     return await home_service.get_homes_nearby_map(db, latitude, longitude, radius)

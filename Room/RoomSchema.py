@@ -1,5 +1,5 @@
-from pydantic import BaseModel, constr, conlist, validator
-from typing import List, Optional
+from pydantic import BaseModel, constr
+from typing import Optional
 
 class Room(BaseModel):
     name: constr(min_length=1, max_length=50)

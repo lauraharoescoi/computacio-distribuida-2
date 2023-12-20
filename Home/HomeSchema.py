@@ -1,5 +1,5 @@
-from pydantic import BaseModel, constr, conlist, validator, Field
-from typing import List, Optional
+from pydantic import BaseModel, constr, conlist, Field
+from typing import Optional
 from geoalchemy2.types import WKBElement
 from typing_extensions import Annotated
 

@@ -1,10 +1,7 @@
-from datetime import date
-from sqlalchemy import Column, DateTime, Integer, String, Boolean, ForeignKey
+from sqlalchemy import Column, Integer, String, ForeignKey
 from geoalchemy2 import Geometry
 from database import Base
-from sqlalchemy.orm import deferred
 
-from sqlalchemy.orm import Mapped, relationship
 
 class Home(Base):
     __tablename__ = "home"

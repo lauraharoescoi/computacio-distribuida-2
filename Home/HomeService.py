@@ -1,5 +1,4 @@
-from models.Home import Home as ModelHome
-from models.User import User
+from Home.HomeModel import Home as ModelHome
 from models.TokenData import TokenData
 
 from utils.service_utils import check_home
@@ -9,19 +8,16 @@ from error.NotFoundException import NotFoundException
 from error.AuthenticationException import AuthenticationException
 from shapely import from_wkb
 
-from fastapi.responses import Response, HTMLResponse
+from fastapi.responses import HTMLResponse
 import os
 import pandas as pd 
 import plotly.express as px
 
-from database import SessionLocal, engine
+from database import SessionLocal
 
-from schemas.Home import RegisterHome, ModifyHome
+from Home.HomeSchema import RegisterHome, ModifyHome
 from geoalchemy2 import WKTElement
 from sqlalchemy import func
-
-
-
 
 
 async def register_home(db: SessionLocal, home: RegisterHome):

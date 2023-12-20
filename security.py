@@ -1,16 +1,12 @@
 from datetime import datetime, timedelta
 from dateutil import parser
-from typing import List
-from database import get_db
 from fastapi.security import OAuth2PasswordBearer, HTTPBasic
-from fastapi import Depends, HTTPException, status, Request
+from fastapi import Depends, HTTPException
 from sqlalchemy.orm import Session
-from jose import JWTError, jwt
+from jose import jwt
 from passlib.hash import pbkdf2_sha256
-import os
 
-from models.User import User as ModelUser
-from schemas.Token import TokenData
+from User.UserModel import User as ModelUser
 from models.TokenData import TokenData as TD
 from config import Configuration
 
