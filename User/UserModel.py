@@ -10,5 +10,6 @@ class User(Base):
     username: str = Column(String, unique=True, index=True)
     password: Mapped[str] = deferred(Column(String))
     token: Mapped[str] = deferred(Column(String, default=""))
+    refresh_token: Mapped[str] = deferred(Column(String, default=""))
 
     
