@@ -219,7 +219,6 @@ async def get_homes_nearby_map(db: SessionLocal, latitude: float, longitude: flo
     return HTMLResponse(content=img, media_type="text/html")
 
 
-
 async def generate_map(df, center_lat, center_lon, file_path, marker_color="blue", center_marker_color="green"):
     try:
         fig = px.scatter_mapbox(
@@ -238,7 +237,6 @@ async def generate_map(df, center_lat, center_lon, file_path, marker_color="blue
             color_discrete_sequence=[center_marker_color],
             lat="Lat", 
             lon="Long", 
-            
         ).data[0])
 
         fig.update_layout(mapbox_style="open-street-map")
