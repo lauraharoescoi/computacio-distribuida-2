@@ -194,13 +194,13 @@ async def get_homes_map_by_user(db: SessionLocal, user: int):
     
     
 async def get_homes_nearby_map(db: SessionLocal, latitude: float, longitude: float, radius: float):
-    point = WKTElement(f'POINT({longitude} {latitude})')
+    point = WKTElement(f'POINT({latitude} {longitude})')
     db_homes = db.query(ModelHome).filter(
         func.ST_DWithin(ModelHome.location, point, radius)
     ).all()
 
     if not db_homes:
-        raise ValueError("No se encontraron casas cercanas")
+        raise NotFoundException("No se encontraron casas cercanas")
 
     data = [{
         'Name': home.name,
