@@ -9,5 +9,5 @@ class Home(Base):
     name: str = Column(String, unique=False, index=True)
     address: str = Column(String, unique=True, index=True)
     description: str = Column(String, unique=False, index=True)
-    owner: int = Column(Integer, ForeignKey("user.id"))
+    owner: int = Column(Integer, ForeignKey("user.id", ondelete="CASCADE"))
     location = Column(Geometry('POINT'))

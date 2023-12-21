@@ -8,7 +8,9 @@ from geoalchemy2 import types as geoalchemy2_types
 
 from alembic import context
 from database import Base
-from models import Home, Room, User
+from Home.HomeModel import Home
+from User.UserModel import User
+from Room.RoomModel import Room
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
