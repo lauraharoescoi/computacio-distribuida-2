@@ -93,20 +93,29 @@ async def get_home_map(db: SessionLocal, homeId: int):
         # Obtener datos de la base de datos
         db_home = db.query(ModelHome).filter(ModelHome.id == homeId).first()
         if not db_home:
-            raise ValueError(f"No se encontró la casa con ID {homeId}")
+            raise NotFoundException(f"No se encontró la casa con ID {homeId}")
 
-        db_home.location = str(from_wkb(str(db_home.location)))
-        lat = db_home.location.split(" ")[1].replace("(", "")
-        long = db_home.location.split(" ")[2].replace(")", "")
-        df = pd.DataFrame({'Lat': [float(lat)], 'Long': [float(long)]})
+        lat = float(str(from_wkb(str(db_home.location))).split(" ")[1].replace("(", "")) + 0.1
+        long = float(str(from_wkb(str(db_home.location))).split(" ")[2].replace(")", ""))
 
+        data = [{
+            'Name': db_home.name,
+            'Address': db_home.address,
+            'Description': db_home.description,
+            'Owner': db_home.owner,
+            'Lat': float(str(from_wkb(str(db_home.location))).split(" ")[1].replace("(", "")),
+            'Long': float(str(from_wkb(str(db_home.location))).split(" ")[2].replace(")", ""))
+        }]
+
+        df = pd.DataFrame(data)
         # Ruta del archivo
         file_path = "./static/map_all.html"
         
-        await generate_map(df, file_path)
+        await generate_map(df, lat, long, file_path)
     except Exception as e:
         # Error al generar el mapa
-        print(f"Error al generar el mapa: {e}")
+        raise NotFoundException(f"Error al generar el mapa: {e}")
+    
 
     try:
         # Leer y devolver la imagen
@@ -115,70 +124,77 @@ async def get_home_map(db: SessionLocal, homeId: int):
         return HTMLResponse(content=img, media_type="text/html")
     except Exception as e:
         # Error al leer el archivo
-        print(f"Error al leer el archivo: {e}")
+        raise NotFoundException(f"Error al generar el archivo: {e}")
 
 
 async def get_all_homes_map(db: SessionLocal):
     try:
         # Obtener datos de varias casas de la base de datos
-        db_homes = db.query(ModelHome).all()  # O ajusta esta consulta según tus necesidades
+        db_homes = db.query(ModelHome).all()
         if not db_homes:
-            raise ValueError("No se encontraron casas")
+            raise NotFoundException("No se encontraron casas")
 
         # Preparar los datos para Plotly
-        data = []
-        for home in db_homes:
-            location = str(from_wkb(str(home.location)))
-            lat = location.split(" ")[1].replace("(", "")
-            long = location.split(" ")[2].replace(")", "")
-            data.append({'Lat': float(lat), 'Long': float(long)})
+        lat = sum([float(str(from_wkb(str(home.location))).split(" ")[1].replace("(", "")) for home in db_homes]) / len(db_homes) + 0.1
+        long = sum([float(str(from_wkb(str(home.location))).split(" ")[2].replace(")", "")) for home in db_homes]) / len(db_homes)
+        data = [{
+            'Name': home.name,
+            'Address': home.address,
+            'Description': home.description,
+            'Owner': home.owner,
+            'Lat': float(str(from_wkb(str(home.location))).split(" ")[1].replace("(", "")),
+            'Long': float(str(from_wkb(str(home.location))).split(" ")[2].replace(")", ""))
+        } for home in db_homes]
 
         df = pd.DataFrame(data)
         file_path = "./static/map_all.html"
-        await generate_map(df, file_path)
+        await generate_map(df, lat, long, file_path)
     except Exception as e:
-        print(f"Error al generar el mapa: {e}")
+                raise NotFoundException(f"Error al generar el mapa: {e}")
 
     try:
         with open(file_path, "rb") as f:
             img = f.read()
         return HTMLResponse(content=img, media_type="text/html")
     except Exception as e:
-        print(f"Error al leer el archivo: {e}")
+        raise NotFoundException(f"Error al generar el archivo: {e}")
         
 
 async def get_homes_map_by_user(db: SessionLocal, user: int):
     try:
         # Obtener datos de varias casas de la base de datos
-        db_homes = db.query(ModelHome).filter(ModelHome.owner == user).all()  # O ajusta esta consulta según tus necesidades
+        db_homes = db.query(ModelHome).filter(ModelHome.owner == user).all()
         if not db_homes:
-            raise ValueError("No se encontraron casas")
+            raise NotFoundException("No se encontraron casas")
 
         # Preparar los datos para Plotly
-        data = []
-        for home in db_homes:
-            location = str(from_wkb(str(home.location)))
-            lat = location.split(" ")[1].replace("(", "")
-            long = location.split(" ")[2].replace(")", "")
-            data.append({'Lat': float(lat), 'Long': float(long)})
+        lat = sum([float(str(from_wkb(str(home.location))).split(" ")[1].replace("(", "")) for home in db_homes]) / len(db_homes) + 0.1
+        long = sum([float(str(from_wkb(str(home.location))).split(" ")[2].replace(")", "")) for home in db_homes]) / len(db_homes)
+        data = [{
+            'Name': home.name,
+            'Address': home.address,
+            'Description': home.description,
+            'Owner': home.owner,
+            'Lat': float(str(from_wkb(str(home.location))).split(" ")[1].replace("(", "")),
+            'Long': float(str(from_wkb(str(home.location))).split(" ")[2].replace(")", ""))
+        } for home in db_homes]
 
         df = pd.DataFrame(data)
         file_path = "./static/map_by_user.html"
-        await generate_map(df, file_path)
+        await generate_map(df, lat, long, file_path)
     except Exception as e:
-        print(f"Error al generar el mapa: {e}")
+        raise NotFoundException(f"Error al generar el mapa: {e}")
 
     try:
         with open(file_path, "rb") as f:
             img = f.read()
         return HTMLResponse(content=img, media_type="text/html")
     except Exception as e:
-        print(f"Error al leer el archivo: {e}")
+        raise NotFoundException(f"Error al generar el archivo: {e}")
     
     
 async def get_homes_nearby_map(db: SessionLocal, latitude: float, longitude: float, radius: float):
-    point = WKTElement(f'POINT({longitude} {latitude})', srid=4326)
-
+    point = WKTElement(f'POINT({longitude} {latitude})')
     db_homes = db.query(ModelHome).filter(
         func.ST_DWithin(ModelHome.location, point, radius)
     ).all()
@@ -230,7 +246,6 @@ async def generate_map(df, center_lat, center_lon, file_path, marker_color="blue
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         fig.write_html(file_path)
     except Exception as e:
-        print(f"Error al generar el mapa: {e}")
-        raise e
+        raise NotFoundException(f"Error al generar el mapa: {e}")
 
 
