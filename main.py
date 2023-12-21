@@ -36,8 +36,8 @@ tags_metadata = [
 ]
 
 app = FastAPI(
-    title="Housing API",
-    description="This is the API for our distributed computing project.",
+    title="MyClimate API",
+    description="This is the API for our distributed computing project. By Laura Haro and Jonàs Salat",
     version="0.0.1",
     openapi_tags=tags_metadata,
     docs_url="/docs",
