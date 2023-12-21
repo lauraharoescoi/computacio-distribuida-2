@@ -2,7 +2,7 @@ from sqlalchemy.orm import Session
 from security import get_password_hash
 
 from User.UserModel import User as ModelUser
-from models.TokenData import TokenData
+from Token.TokenModel import TokenData
 
 from User.UserSchema import User
 

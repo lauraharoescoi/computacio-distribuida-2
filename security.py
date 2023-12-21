@@ -7,7 +7,7 @@ from jose import jwt
 from passlib.hash import pbkdf2_sha256
 
 from User.UserModel import User as ModelUser
-from models.TokenData import TokenData as TD
+from Token.TokenModel import TokenData as TD
 from config import Configuration
 
 from error import AuthenticationException, NotFoundException

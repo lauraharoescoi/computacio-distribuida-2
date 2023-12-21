@@ -1,6 +1,6 @@
 from Home.HomeModel import Home as ModelHome
 from Room.RoomModel import Room as ModelRoom
-from models.TokenData import TokenData
+from Token.TokenModel import TokenData
 
 from utils.service_utils import set_existing_data
 from error.NotFoundException import NotFoundException

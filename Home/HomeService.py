@@ -1,5 +1,5 @@
 from Home.HomeModel import Home as ModelHome
-from models.TokenData import TokenData
+from Token.TokenModel import TokenData
 
 from utils.service_utils import check_home
 
@@ -12,18 +12,20 @@ from fastapi.responses import HTMLResponse
 import os
 import pandas as pd 
 import plotly.express as px
+import plotly.graph_objects as go
 
 from database import SessionLocal
 
 from Home.HomeSchema import RegisterHome, ModifyHome
 from geoalchemy2 import WKTElement
 from sqlalchemy import func
+import json
 
 
 async def register_home(db: SessionLocal, home: RegisterHome):
     await check_home(db, home.address)
     lat, lon = home.location
-    location_wkt = WKTElement(f'POINT({lon} {lat})')
+    location_wkt = WKTElement(f'SRID=4326;POINT({lat} {lon})')
     db_home = ModelHome(name=home.name, address=home.address, description=home.description, owner=home.owner, location=location_wkt)
     db.add(db_home)
     db.commit()
@@ -194,7 +196,9 @@ async def get_homes_map_by_user(db: SessionLocal, user: int):
     
     
 async def get_homes_nearby_map(db: SessionLocal, latitude: float, longitude: float, radius: float):
-    point = WKTElement(f'POINT({latitude} {longitude})')
+    point = WKTElement(f'SRID=4326;POINT({latitude} {longitude})')
+    
+    # Buscar casas cercanas
     db_homes = db.query(ModelHome).filter(
         func.ST_DWithin(ModelHome.location, point, radius)
     ).all()
@@ -202,6 +206,7 @@ async def get_homes_nearby_map(db: SessionLocal, latitude: float, longitude: flo
     if not db_homes:
         raise NotFoundException("No se encontraron casas cercanas")
 
+    # Preparar datos de las casas para Plotly
     data = [{
         'Name': home.name,
         'Address': home.address,
@@ -212,8 +217,17 @@ async def get_homes_nearby_map(db: SessionLocal, latitude: float, longitude: flo
     } for home in db_homes]
 
     df = pd.DataFrame(data)
+
+    # Generar la geometría del área de búsqueda
+    area_de_busqueda = db.scalar(
+        func.ST_AsGeoJSON(func.ST_Buffer(point, radius))
+    )
+    
+    
+    area_de_busqueda_geojson = json.loads(area_de_busqueda)
+    # Generar y devolver el mapa
     file_path = "./static/map_nearby_homes.html"
-    await generate_map(df, latitude, longitude, file_path, 'red', 'green')
+    await generate_map_nearby(df, latitude, longitude, area_de_busqueda_geojson, file_path, 'red', 'green')
     with open(file_path, "rb") as f:
         img = f.read()
     return HTMLResponse(content=img, media_type="text/html")
@@ -246,4 +260,65 @@ async def generate_map(df, center_lat, center_lon, file_path, marker_color="blue
     except Exception as e:
         raise NotFoundException(f"Error al generar el mapa: {e}")
 
+
+
+async def generate_map_nearby(df, center_lat, center_lon, area_de_busqueda_geojson, file_path, marker_color="blue", center_marker_color="green"):
+    try:
+        # Crear el gráfico base con los puntos (casas)
+        fig = go.Figure(go.Scattermapbox(
+            lat=df['Lat'], 
+            lon=df['Long'], 
+            mode='markers',
+            marker=go.scattermapbox.Marker(
+                size=9,
+                color=marker_color
+            ),
+            text=df['Name'],
+            name='Homes'  # Nombre en la leyenda para las casas
+        ))
+
+        # Añadir el área de búsqueda
+        if area_de_busqueda_geojson:
+            coords = area_de_busqueda_geojson['coordinates'][0]
+            lats = [coord[0] for coord in coords]
+            lons = [coord[1] for coord in coords]
+            # Añadir la geometría del área de búsqueda como una línea en el mapa
+            fig.add_trace(go.Scattermapbox(
+                lat=lats,
+                lon=lons,
+                mode='lines',
+                marker=go.scattermapbox.Marker(
+                    size=1,
+                    color='cyan'
+                ),
+                name='Search area'  # Nombre en la leyenda para el área de búsqueda
+            ))
+
+        # Añadir un marcador para el punto central
+        fig.add_trace(go.Scattermapbox(
+            lat=[center_lat],
+            lon=[center_lon],
+            mode='markers',
+            marker=go.scattermapbox.Marker(
+                size=12,
+                color=center_marker_color
+            ),
+            text=['Central point'],
+            name='Central point'  # Nombre en la leyenda para el punto central
+        ))
+
+        # Configuración del mapa
+        fig.update_layout(
+            mapbox_style="open-street-map",
+            mapbox=dict(
+                center=go.layout.mapbox.Center(lat=center_lat, lon=center_lon),
+                zoom=14
+            ),
+            margin={"r":0, "t":0, "l":0, "b":0}
+        )
+
+        os.makedirs(os.path.dirname(file_path), exist_ok=True)
+        fig.write_html(file_path)
+    except Exception as e:
+        raise NotFoundException(f"Error al generar el mapa: {e}")
 
