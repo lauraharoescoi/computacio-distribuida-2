@@ -1,4 +1,5 @@
 from Home.HomeModel import Home as ModelHome
+from User.UserModel import User as ModelUser
 from Token.TokenModel import TokenData
 
 from utils.service_utils import check_home
@@ -24,6 +25,9 @@ import json
 
 async def register_home(db: SessionLocal, home: RegisterHome):
     await check_home(db, home.address)
+    db_user = db.query(ModelUser).filter(ModelUser.id == home.owner).first()
+    if db_user is None:
+        raise NotFoundException("User not found")
     lat, lon = home.location
     location_wkt = WKTElement(f'SRID=4326;POINT({lat} {lon})')
     db_home = ModelHome(name=home.name, address=home.address, description=home.description, owner=home.owner, location=location_wkt)

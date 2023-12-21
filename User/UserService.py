@@ -3,6 +3,7 @@ from security import get_password_hash
 
 from User.UserModel import User as ModelUser
 from Token.TokenModel import TokenData
+from Home.HomeModel import Home as ModelHome
 
 from User.UserSchema import User
 
@@ -10,6 +11,7 @@ from utils.service_utils import set_existing_data
 from utils.service_utils import check_user
 from error.AuthenticationException import AuthenticationException
 from error.NotFoundException import NotFoundException
+from error.ValidationException import ValidationException
 
 
 async def get_all(db: Session):
@@ -38,13 +40,15 @@ def delete_user(db: Session, userId: int, token: TokenData):
         if not (token.user_id == userId):
             raise AuthenticationException("This user does't own this user")
     try:
+        db_home = db.query(ModelHome).filter(ModelHome.owner == userId).all()
+        if db_home is not []:
+            raise ValidationException("Can't delete user with home")
         deleted_rows = db.query(ModelUser).filter(ModelUser.id == userId).delete()
         db.commit()
-        return deleted_rows
+        return {"deleted_rows": deleted_rows}
     except Exception as e:
         db.rollback()  # Rollback changes if an exception occurs
-        print(f"Error deleting user: {e}")
-        raise
+        raise e
 
 async def modify_user(db: Session, userId: int, user: User):
     db_user = db.query(ModelUser).filter(ModelUser.id == userId).first()
